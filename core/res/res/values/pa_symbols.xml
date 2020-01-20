@@ -129,4 +129,7 @@
     <java-symbol type="bool" name="config_intrusiveBatteryLed" />
     <java-symbol type="bool" name="config_multiColorBatteryLed" />
     <java-symbol type="bool" name="config_ledCanPulse" />
+
+    <!-- Themes -->
+    <java-symbol type="color" name="theme_generic_semi_transparent_color" />
 </resources>
