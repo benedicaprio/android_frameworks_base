@@ -234,6 +234,8 @@ import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.InjectionInflationController;
 import com.android.systemui.volume.VolumeComponent;
 
+import com.google.android.systemui.keyguard.KeyguardSliceProviderGoogle;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -654,9 +656,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         mKeyguardViewMediator = getComponent(KeyguardViewMediator.class);
         mActivityIntentHelper = new ActivityIntentHelper(mContext);
 
-        mSliceProvider = KeyguardSliceProvider.getAttachedInstance();
-        if (mSliceProvider != null) {
-            mSliceProvider.initDependencies(mMediaManager, mStatusBarStateController,
+        final KeyguardSliceProvider sliceProvider = KeyguardSliceProviderGoogle.getAttachedInstance();
+        if (sliceProvider != null) {
+            sliceProvider.initDependencies(mMediaManager, mStatusBarStateController,
                     mKeyguardBypassController, DozeParameters.getInstance(mContext));
         } else {
             Log.w(TAG, "Cannot init KeyguardSliceProvider dependencies");
@@ -1797,6 +1799,15 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public NotificationPresenter getPresenter() {
         return mPresenter;
+    }
+
+    private void setPulseOnNewTracks() {
+        final KeyguardSliceProvider sliceProvider = KeyguardSliceProviderGoogle.getAttachedInstance();
+        if (sliceProvider != null) {
+            sliceProvider.setPulseOnNewTracks(Settings.System.getIntForUser(mContext.getContentResolver(),
+                    Settings.System.PULSE_ON_NEW_TRACKS, 1,
+                    UserHandle.USER_CURRENT) == 1);
+        }
     }
 
     /**
@@ -3848,13 +3859,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             updateIsKeyguard();
         }
     };
-
-    private void setPulseOnNewTracks() {
-        if (mSliceProvider != null) {
-            mSliceProvider.setPulseOnNewTracks(Settings.System.getIntForUser(mContext.getContentResolver(),
-                    Settings.System.PULSE_ON_NEW_TRACKS, 1, UserHandle.USER_CURRENT) == 1);
-        }
-    }
 
     public int getWakefulnessState() {
         return mWakefulnessLifecycle.getWakefulness();
